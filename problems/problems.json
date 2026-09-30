@@ -1,0 +1,111 @@
+{
+    "add_numbers": {
+        "title": "Add Two Numbers",
+        "description": "Write a Python function called add that takes two numbers and returns their sum.",
+        "function_name": "add",
+        "topic": "Basic Arithmetic",
+        "difficulty": "Easy",
+        "test_cases": [
+            {
+                "input": [5, 3],
+                "expected": 8
+            },
+            {
+                "input": [10, 20],
+                "expected": 30
+            },
+            {
+                "input": [-2, 5],
+                "expected": 3
+            }
+        ]
+    },
+
+    "subtract_numbers": {
+        "title": "Subtract Two Numbers",
+        "description": "Write a Python function called subtract that takes two numbers and returns their difference.",
+        "function_name": "subtract",
+        "topic": "Basic Arithmetic",
+        "difficulty": "Easy",
+        "test_cases": [
+            {
+                "input": [10, 3],
+                "expected": 7
+            },
+            {
+                "input": [20, 5],
+                "expected": 15
+            },
+            {
+                "input": [5, 10],
+                "expected": -5
+            }
+        ]
+    },
+
+    "multiply_numbers": {
+        "title": "Multiply Two Numbers",
+        "description": "Write a Python function called multiply that takes two numbers and returns their product.",
+        "function_name": "multiply",
+        "topic": "Basic Arithmetic",
+        "difficulty": "Easy",
+        "test_cases": [
+            {
+                "input": [5, 3],
+                "expected": 15
+            },
+            {
+                "input": [10, 2],
+                "expected": 20
+            },
+            {
+                "input": [-2, 5],
+                "expected": -10
+            }
+        ]
+    },
+
+    "square_number": {
+        "title": "Square a Number",
+        "description": "Write a Python function called square that takes a number and returns its square.",
+        "function_name": "square",
+        "topic": "Basic Arithmetic",
+        "difficulty": "Easy",
+        "test_cases": [
+            {
+                "input": [5],
+                "expected": 25
+            },
+            {
+                "input": [10],
+                "expected": 100
+            },
+            {
+                "input": [-3],
+                "expected": 9
+            }
+        ]
+    },
+
+    "check_even_odd": {
+        "title": "Check Even or Odd",
+        "description": "Write a Python function called check_even_odd that returns 'Even' if a number is even and 'Odd' if it is odd.",
+        "function_name": "check_even_odd",
+        "topic": "Conditions",
+        "difficulty": "Easy",
+        "test_cases": [
+            {
+                "input": [4],
+                "expected": "Even"
+            },
+            {
+                "input": [7],
+                "expected": "Odd"
+            },
+            {
+                "input": [10],
+                "expected": "Even"
+            }
+        ]
+    }
+}

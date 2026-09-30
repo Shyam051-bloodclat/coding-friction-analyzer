@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Coding Friction Analyzer</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .problem-box {
+            background-color: #eeeeee;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .problem-box h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .problem-details {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .problem-details span {
+            display: inline-block;
+            margin-right: 25px;
+        }
+
+        .problem-description {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        textarea {
+            width: 100%;
+            height: 285px;
+            resize: vertical;
+            padding: 15px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            background-color: #1e1e1e;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            tab-size: 4;
+            white-space: pre;
+            overflow: auto;
+        }
+
+        textarea::placeholder {
+            color: #888;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333333;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #222222;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 6px;
+            background-color: #eeeeee;
+        }
+
+        .result h2 {
+            margin-top: 0;
+        }
+
+        .correct {
+            color: green;
+            font-weight: bold;
+        }
+
+        .wrong {
+            color: red;
+            font-weight: bold;
+        }
+
+        .error {
+            color: darkred;
+            font-weight: bold;
+        }
+
+        .result p {
+            line-height: 1.5;
+        }
+
+        pre {
+            background-color: #1e1e1e;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+    <h1>Coding Friction Analyzer</h1>
+
+
+    <form method="POST" onsubmit="calculateTime()">
+
+
+        <input
+            type="hidden"
+            name="start_time"
+            id="start_time"
+        >
+
+
+        <label for="student_name">
+            Student Name:
+        </label>
+
+
+        <input
+            type="text"
+            name="student_name"
+            id="student_name"
+            placeholder="Enter your name"
+            value="{{ student_name }}"
+            required
+        >
+
+
+        <label for="problem">
+            Select Problem:
+        </label>
+
+
+        <select
+            name="problem"
+            id="problem"
+            onchange="changeProblem()"
+        >
+
+            {% for problem_id, problem in problems.items() %}
+
+                <option
+                    value="{{ problem_id }}"
+                    {% if problem_id == request.form.get('problem', '') %}
+                        selected
+                    {% elif problem_id == problems.keys()|list|first and not request.form.get('problem') %}
+                        selected
+                    {% endif %}
+                >
+
+                    {{ problem.title }}
+
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <div class="problem-box">
+
+            <h2>
+                {{ selected_problem.title }}
+            </h2>
+
+
+            <div class="problem-details">
+
+                <span>
+
+                    <strong>Topic:</strong>
+
+                    {{ selected_problem.topic }}
+
+                </span>
+
+
+                <span>
+
+                    <strong>Difficulty:</strong>
+
+                    {{ selected_problem.difficulty }}
+
+                </span>
+
+            </div>
+
+
+            <p class="problem-description">
+
+                {{ selected_problem.description }}
+
+            </p>
+
+        </div>
+
+
+        <textarea
+            name="code"
+            id="code-editor"
+            placeholder="Write or paste your Python code here"
+            spellcheck="false"
+        >{{ code }}</textarea>
+
+
+        <button type="submit">
+            Analyze Code
+        </button>
+
+
+    </form>
+
+
+    {% if result %}
+
+    <div class="result">
+
+        <h2>
+            Analysis Result
+        </h2>
+
+
+        {% if result.status == "Correct" %}
+
+            <p class="correct">
+                Status: Correct
+            </p>
+
+        {% elif result.status == "Wrong Answer" %}
+
+            <p class="wrong">
+                Status: Wrong Answer
+            </p>
+
+        {% elif result.status == "Syntax Error" %}
+
+            <p class="error">
+                Status: Syntax Error
+            </p>
+
+        {% elif result.status == "Runtime Error" %}
+
+            <p class="error">
+                Status: Runtime Error
+            </p>
+
+        {% elif result.status == "Function Error" %}
+
+            <p class="error">
+                Status: Function Error
+            </p>
+
+        {% else %}
+
+            <p>
+                Status: {{ result.status }}
+            </p>
+
+        {% endif %}
+
+
+        {% if result.message %}
+
+            <p>
+
+                <strong>Explanation:</strong>
+
+                {{ result.message }}
+
+            </p>
+
+        {% endif %}
+
+
+        {% if result.error_type %}
+
+            <p>
+
+                <strong>Error Type:</strong>
+
+                {{ result.error_type }}
+
+            </p>
+
+        {% endif %}
+
+
+        {% if result.line %}
+
+            <p>
+
+                <strong>Problematic Line:</strong>
+
+                {{ result.line }}
+
+            </p>
+
+        {% endif %}
+
+
+        {% if result.explanation %}
+
+            <p>
+
+                <strong>Why:</strong>
+
+                {{ result.explanation }}
+
+            </p>
+
+        {% endif %}
+
+
+        {% if result.correction %}
+
+            <p>
+
+                <strong>Suggested Correction:</strong>
+
+            </p>
+
+
+            <pre>{{ result.correction }}</pre>
+
+        {% endif %}
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+    const editor = document.getElementById("code-editor");
+
+
+    /*
+        Set the initial timer value.
+    */
+
+    const startTime = {{ start_time|default(0) }};
+
+    document.getElementById("start_time").value = startTime;
+
+
+    /*
+        Handle Tab and Enter inside the code editor.
+    */
+
+    editor.addEventListener("keydown", function(event) {
+
+
+        /*
+            TAB
+
+            Pressing Tab inserts four spaces
+            instead of moving to another HTML element.
+        */
+
+        if (event.key === "Tab") {
+
+            event.preventDefault();
+
+
+            const start = this.selectionStart;
+
+            const end = this.selectionEnd;
+
+
+            /*
+                SHIFT + TAB
+
+                Remove four spaces from the beginning
+                of the current line.
+            */
+
+            if (event.shiftKey) {
+
+                const lineStart =
+                    this.value.lastIndexOf("\n", start - 1) + 1;
+
+
+                const lineBeforeCursor =
+                    this.value.substring(lineStart, start);
+
+
+                if (lineBeforeCursor.startsWith("    ")) {
+
+                    this.value =
+                        this.value.substring(0, lineStart) +
+                        this.value.substring(lineStart + 4);
+
+
+                    this.selectionStart =
+                        Math.max(lineStart, start - 4);
+
+                    this.selectionEnd =
+                        Math.max(lineStart, end - 4);
+
+                }
+
+                return;
+            }
+
+
+            /*
+                Normal TAB
+
+                Insert four spaces.
+            */
+
+            this.value =
+                this.value.substring(0, start) +
+                "    " +
+                this.value.substring(end);
+
+
+            this.selectionStart =
+                this.selectionEnd =
+                start + 4;
+
+        }
+
+
+        /*
+            ENTER
+
+            Automatically preserve the indentation
+            of the current line.
+
+            If the current line ends with ":" then
+            add another four spaces.
+        */
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+
+            const start = this.selectionStart;
+
+            const end = this.selectionEnd;
+
+
+            const beforeCursor =
+                this.value.substring(0, start);
+
+
+            const lineStart =
+                beforeCursor.lastIndexOf("\n") + 1;
+
+
+            const currentLine =
+                beforeCursor.substring(lineStart);
+
+
+            /*
+                Find the existing indentation.
+            */
+
+            const indentationMatch =
+                currentLine.match(/^[ \t]*/);
+
+
+            const indentation =
+                indentationMatch
+                    ? indentationMatch[0]
+                    : "";
+
+
+            /*
+                Add four spaces when the line ends
+                with a Python block colon.
+            */
+
+            let extraIndent = "";
+
+
+            if (currentLine.trim().endsWith(":")) {
+
+                extraIndent = "    ";
+
+            }
+
+
+            const newLine =
+                "\n" +
+                indentation +
+                extraIndent;
+
+
+            this.value =
+                this.value.substring(0, start) +
+                newLine +
+                this.value.substring(end);
+
+
+            const newPosition =
+                start + newLine.length;
+
+
+            this.selectionStart =
+                this.selectionEnd =
+                newPosition;
+
+        }
+
+    });
+
+
+    /*
+        When the problem is changed, submit the form
+        so Flask loads the selected problem.
+    */
+
+    function changeProblem() {
+
+        document.getElementById("code-editor").value = "";
+
+        document.querySelector("form").submit();
+
+    }
+
+
+    /*
+        Keep the timer value when submitting the form.
+    */
+
+    function calculateTime() {
+
+        document.getElementById("start_time").value = startTime;
+
+    }
+
+</script>
+
+
+</body>
+
+</html>
